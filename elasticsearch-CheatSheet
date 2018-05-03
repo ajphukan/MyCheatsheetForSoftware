@@ -1,0 +1,252 @@
+ElasticSearch CheatSheet 
+
+Cluster and node information
+
+GET /_cluster/health?pretty
+
+GET /_cluster/health?wait_for_status=yellow&timeout=50s
+
+GET /_cluster/state
+
+GET /_cluster/stats?human&pretty
+
+GET /_cluster/pending_tasks
+
+GET /_nodes
+
+GET /_nodes/stats
+
+GET /_nodes/nodeId1,nodeId2/stats
+
+
+
+Updating settings
+
+Change dynamically the minimum number of nodes to allow a master election, both persistent or not: 
+
+PUT /_cluster/settings
+{
+  "persistent": {
+    "discovery.zen.minimum_master_nodes": 3
+  }
+}
+
+PUT /_cluster/settings
+{
+  "transient": {
+    "discovery.zen.minimum_master_nodes": 2
+  }
+}
+
+Disable shard allocation, useful before a rolling restart:
+
+PUT /_cluster/settings
+{
+    "transient" : {
+        "cluster.routing.allocation.enable" : "none"
+    }
+}
+
+PUT /_cluster/settings
+{
+    "transient" : {
+        "cluster.routing.allocation.enable" : "all"
+    }
+}
+
+
+ Debug and development
+
+ To get a detailed view of what query can do we just need to add explain
+
+ example :
+
+ Get a detailed view of what a query do:
+
+ GET /indexName/typeName/_validate/query?explain=true
+{
+  "query": {
+    "match": {
+      "userName": "Ankur"
+    }
+  }
+}
+
+
+Get an explanation about a document matching or not:
+
+GET /blog/post/1/_explain
+{
+  "query": {
+    "match": {
+      "userName": "Ankur"
+    }
+  }
+}
+
+
+Status and Management Of Indices 
+
+POST /indexName/_flush
+
+POST /indexName/_refresh
+
+POST /indexName/_forcemerge
+
+POST /indexName/_cache/clear
+
+
+Monitoring and Information Of Indices 
+
+GET /indexName/_stats
+
+GET /indexName/_segments
+
+GET /indexName/_recovery?pretty&human
+
+
+Open and Close indexes to save memory and do the backup and 
+deletion process without any problem 
+
+POST /indexName/_close
+
+POSt /indexName/_open
+
+
+To Delete a Document from index we have to use the document ID 
+
+DELETE /indexName/typeName/123id
+
+where 123id is a ID
+
+
+To create and update document 
+(Note : Id is required in this request)
+
+PUT /indexName/typeName/12abc
+{
+  "keyName1": "keyValue",
+  "keyName2": ["keyValue as array"],
+  "keyName3": 22 , // keyValue as number 
+}
+
+
+Document with auto-generated ID :
+
+PUT /indexName/typeName
+{
+  "keyName1": "keyValue",
+  "keyName2": ["keyValue as array"],
+  "keyName3": 22 , // keyValue as number 
+}
+
+
+The mapping and the settings
+
+GET /indexName/_mapping
+
+GET /indexName/_settings
+
+
+Update an index by adding a field to a type
+
+{
+  "typeName": {
+    "properties": {
+      "keyName1": {
+        "type": "keyword"
+      }
+    }
+  }
+}
+
+Update index settings dynamically
+
+PUT /indexName/_settings
+{
+  "index": {
+    "refresh_interval": "-1",
+    "number_of_replicas": 0
+  }
+}
+
+
+Queries
+
+There is two syntax for the basic queries:  
+
+//a simple one
+GET _search
+{
+  "query": {
+    "match": {
+      "FIELD": "TEXT"
+    }
+  }
+}
+
+
+//an extended one with options
+GET _search
+{
+  "query": {
+    "match": {
+      "FIELD": {
+        "query": "TEXT",
+        "OPTION": "VALUE"
+      }
+    }
+  }
+}
+
+Full search example:  
+
+          
+GET /_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "gender": "male"
+          }
+        }
+      ],
+      "must_not": [
+        {
+          "match_phrase": {
+            "userName": "Ankur Jyoti Phukan"
+          }
+        }
+      ]
+    }
+  }
+  "size": 10,
+  "from": 2
+}
+
+Common queries
+
+"multi_match": {
+  "query": "Elastic",
+  "fields": ["user.*", "title^3"],
+  "type": "best_fields"
+}
+
+"bool": {
+  "must": [],
+  "must_not": [],
+  "filter": [],
+  "should": [],
+  "minimum_should_match" : 1
+}
+
+"range": {
+  "age": {
+    "gte": 10,
+    "lte": 20,
+    "boost": 2
+  }
+}
+

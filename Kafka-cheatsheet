@@ -1,0 +1,124 @@
+//Things i used during the whole project and some extra from article i read 
+
+TOPIC:
+
+Note : 
+1.Run the programm in daemon mode else the programm will stop as the session is over between the user and server 
+(user disconnect from the remote server ) . Use this command to run Kafka in daemon .
+first Open the kafka folder  then :
+./bin/kafka-server-start.sh config/server.properties
+
+
+2.Partition for a topic should be more than the number of
+consumer . And make sure no of partiton is not much because each partition will need some memory 
+and processer time. 
+
+you Will get all these command in bin folder of kafka 
+
+
+
+Creating a New Topic :
+
+kafka-topics --create --zookeeper {ZookeeperIP for Kafka}:{Zookeeper port} --replication-factor 1 --partitions 3 --topic topic_name
+
+List all topic in Cluster And also to Verify :
+
+kafka-topics --list --zookeeper {ZookeeperIP for Kafka}:{Zookeeper port}
+
+
+Alter Kafka Topic Partitions :
+
+kafka-topics --zookeeper {ZookeeperIP for Kafka}:{Zookeeper port} --alter --topic topic_name --partitions 10
+
+
+Deleting a Topic :
+
+kafka-topics --zookeeper {ZookeeperIP for Kafka}:{Zookeeper port} --delete --topic topic_name
+
+Describing Topic Details :
+
+kafka-topics --zookeeper {ZookeeperIP for Kafka}:{Zookeeper port}/kafka-cluster --describe
+
+
+Show Under-replicated Partitions for topics :
+
+kafka-topics --zookeeper {ZookeeperIP for Kafka}:{Zookeeper port}/kafka-cluster --describe --under-replicated-partitions
+
+
+
+
+/////
+For Terminal side Use
+
+Producers
+
+
+Produce messages standard input
+
+kafka-console-producer --broker-list {KafkaIp}:{KafkaPort} --topic topic_name
+
+
+Produce message from a file to a topic
+
+kafka-console-producer --broker-list {KafkaIp}:{KafkaPort} --topic topic_name < messages.txt
+
+
+Consumers
+
+
+Start a consumer from the beginning of the log
+
+kafka-console-consumer --bootstrap-server {KafkaIp}:{KafkaPort} --topic topicName --from-beginning
+
+
+Consume 1 message
+kafka-console-consumer --bootstrap-server {KafkaIp}:{KafkaPort} --topic topicName  --max-messages 1
+
+Consume, specify consumer group:
+
+kafka-console-consumer --topic topicName --new-consumer --bootstrap-server {KafkaIp}:{KafkaPort} --consumer-property group.id=group_id
+
+/////
+
+
+
+Consumers admin operations
+
+List Groups
+
+kafka-consumer-groups --new-consumer --list --bootstrap-server {KafkaIp}:{KafkaPort}
+
+
+Describe Groups
+
+kafka-consumer-groups --bootstrap-server {KafkaIp}:{KafkaPort} --describe --group groupId
+
+
+
+
+Topic Configuration 
+
+
+Set the retention for the topic (set it to 1 sec {1000}  during testing because it remove message and let us test without any problem)
+
+kafka-configs --zookeeper {ZookeeperIP for Kafka}:{Zookeeper port} --alter --entity-type topics --entity-name topicName --add-config retention.ms=3600000
+
+
+Show all configuration overrides for a topic
+
+kafka-configs --zookeeper {ZookeeperIP for Kafka}:{Zookeeper port} --describe --entity-type topics --entity-name topicName
+
+
+Delete a configuration override for retention.ms for a topic
+
+kafka-configs --zookeeper {ZookeeperIP for Kafka}:{Zookeeper port} --alter --entity-type topics --entity-name topicName --delete-config retention.ms 
+
+
+
+
+Kafka Performance (To check the Kafka performance)
+
+Producer
+
+kafka-producer-perf-test --topic position-reports --throughput 10000 --record-size 300 --num-records 20000 --producer-props bootstrap.servers="{KafkaIp}:{KafkaPort}"
+
